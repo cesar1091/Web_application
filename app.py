@@ -8,6 +8,7 @@ app = MultiApp()
 st.markdown("""
 # Web app prediccion de ventas sell out protisa
 Seleccione la escala temporal de prediccion (semanal, quincenal, mensual)
+![Neurona](logo_ml.png)
 """)
 
 # Add all your application here
