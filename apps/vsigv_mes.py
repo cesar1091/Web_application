@@ -19,7 +19,7 @@ def app():
         data = pd.pivot_table(data=df,index=['Region', 'Categoria', 'Marca', 'Segmento', 'MONTH'],columns=["YEAR"],values=["VSIGV"])
         data = data.reset_index()
         values = data.values
-        data = pd.DataFrame(data=values,columns = ['Region', 'Categoria', 'Marca', 'Segmento', 'MONTH','VSIGV2018','VSIGV2019','VSIGV2020','VSIGV2021'])
+        data = pd.DataFrame(data=values,columns = ['Region', 'Categoria', 'Marca', 'Segmento', 'MONTH','VSIGV2017','VSIGV2018','VSIGV2019','VSIGV2020','VSIGV2021'])
         data.fillna(0.00,inplace=True)
         valid_set = data[data['VSIGV2021']>=0].drop(['VSIGV2017','VSIGV2018'],axis=1)
         valid_set['Year'] = '2021'
