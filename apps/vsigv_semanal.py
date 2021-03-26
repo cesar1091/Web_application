@@ -10,6 +10,7 @@ def app():
     Shown are the sells per week
 
     """)
+    st.write('---')
 
     sql_conn = pyodbc.connect('DRIVER={SQL Server};SERVER=51.222.82.146;DATABASE=STRATEGIO_OLAP_PROTISA;UID=Cesar_VS;PWD=Invernalia!2193;Trusted_Connection=no')
     query = "SELECT d.Region,c.Categoria,c.Marca,c.Segmento,DATEPART(WEEK,a.CodigoFecha) AS WEEK,YEAR(a.CodigoFecha) AS YEAR,SUM(a.VentaSinIgv) AS VSIGV FROM [STRATEGIO_OLAP_PROTISA].[pbix].[Ventas] AS a LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Producto] AS c ON a.CodigoProductoDistribuidor = c.CodigoProducto LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Distribuidor] AS d ON a.CodigoDistribuidor = d.CodigoDistribuidor LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Cliente] AS e ON a.CodigoCliente = e.CodigoCliente WHERE YEAR(a.CodigoFecha)>=2018 AND YEAR(a.CodigoFecha)<=2021 AND a.CodigoDistribuidor not in ('20100239559.0','20100239559.1','20100239559.2','20100239559.3','20100239559.7','20100239559.9') AND c.Marca not in ('Ego','Ideal','Sussy') AND a.CodigoDistribuidor IS NOT NULL AND d.Canal NOT IN ('Farmacia') GROUP BY d.Region,c.Categoria,c.Marca,c.Segmento,DATEPART(WEEK,a.CodigoFecha),YEAR(a.CodigoFecha)"
@@ -54,6 +55,7 @@ def app():
     data_form = data_form.loc[(data_form['Region']==region_choice) & (data_form['Categoria']==categoria_choice) & (data_form['Marca']==marca_choice) & (data_form['Segmento']==segmento_choice)]
 
     st.dataframe(data_form)
+    st.write('---')
 
     data_1 = data_form[data_form['VSIGV']>0].drop('Year',axis=1)
     data_2 = data_form[(data_form['VSIGV']>=0) & (data_form['Year']=='2021')].drop('Year',axis=1)
@@ -62,7 +64,7 @@ def app():
     data_train_dummies_2 = pd.get_dummies(data_2,columns=['Region', 'Categoria', 'Marca', 'Segmento', 'WEEK'],dtype=float)
 
     X_1 = data_train_dummies_1.drop(["VSIGV"],axis=1)
-    y_1 = data_train_dummies_1[["VSIGV"]]
+    y_1 = data_train_dummies_1["VSIGV"]
 
     from sklearn.model_selection import train_test_split
     x_train, x_test, y_train, y_test = train_test_split(X_1,y_1, test_size=0.15, random_state=10079)
@@ -74,11 +76,6 @@ def app():
     regressor = RandomForestRegressor(random_state = 0)
     # fit the regressor with x and y data
     regressor.fit(x_train, y_train)
-
-    import shap
-
-    explainer = shap.TreeExplainer(regressor)
-    shap_values = explainer.shap_values(x_train)
 
     def undummify(df, prefix_sep="_"):
         cols2collapse = {
@@ -120,6 +117,7 @@ def app():
     proyeccion = data_train_undummy.sort_values(by=['WEEK'],ascending=True)
     proyeccion['Año'] = 2021
     st.dataframe(proyeccion[["WEEK","Año","VSIGV","Predict"]])
+    st.write('---')
 
     def get_table_download_link_csv(df):
         import pybase64
@@ -138,5 +136,3 @@ def app():
     fig = px.line(data_train_undummy, x="WEEK", y=["VSIGV","Predict"])
 
     st.plotly_chart(fig)
-    st.write('---')
-    shap.summary_plot(shap_values,x_train)
