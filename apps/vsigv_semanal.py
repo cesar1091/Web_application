@@ -31,7 +31,7 @@ def app():
         c = np.concatenate((a, b))
         data_train = pd.DataFrame(c)
         data_train.columns = columnas
-        data_train.rename(columns={'VSIGV2019': 'VSIGV2YA', 
+        data_train.rename(columns={'VSIGV2019': 'VSIGV2YA',
                                    'VSIGV2020': 'VSIGV1YA',
                                    'VSIGV2021': 'VSIGV'}, inplace=True)
         return data_train
@@ -51,11 +51,11 @@ def app():
     segmento = data_form["Segmento"].loc[(data_form["Region"]==region_choice) &(data_form["Categoria"]==categoria_choice) & (data_form["Marca"]==marca_choice)].unique()
     segmento_choice = st.sidebar.selectbox('Select segment:', segmento)
 
-    data_form = data_form.loc[(data_form['Region']==region_choice) & (data_form['Categoria']==categoria_choice) & (data_form['Marca']==marca_choice) & (data_form['Segmento']==segmento_choice)] 
+    data_form = data_form.loc[(data_form['Region']==region_choice) & (data_form['Categoria']==categoria_choice) & (data_form['Marca']==marca_choice) & (data_form['Segmento']==segmento_choice)]
 
     st.dataframe(data_form)
 
-    data_1 = data_form[data_form['VSIGV']>0].drop('Year',axis=1) 
+    data_1 = data_form[data_form['VSIGV']>0].drop('Year',axis=1)
     data_2 = data_form[(data_form['VSIGV']>=0) & (data_form['Year']=='2021')].drop('Year',axis=1)
 
     data_train_dummies_1 = pd.get_dummies(data_1,columns=['Region', 'Categoria', 'Marca', 'Segmento', 'WEEK'],dtype=float)
@@ -73,7 +73,12 @@ def app():
     # create regressor object
     regressor = RandomForestRegressor(random_state = 0)
     # fit the regressor with x and y data
-    regressor.fit(x_train, y_train) 
+    regressor.fit(x_train, y_train)
+
+    import shap
+
+    explainer = shap.TreeExplainer(regressor)
+    shap_values = explainer.shap_values(x_train)
 
     def undummify(df, prefix_sep="_"):
         cols2collapse = {
@@ -120,15 +125,20 @@ def app():
         import pybase64
         #csv = df.to_csv(index=False)
         csv = df.to_csv().encode()
-        #b64 = base64.b64encode(csv.encode()).decode() 
+        #b64 = base64.b64encode(csv.encode()).decode()
         b64 = pybase64.b64encode(csv).decode()
         href = f'<a href="data:file/csv;base64,{b64}" download="captura.csv" target="_blank">Download csv file</a>'
         return href
 
     st.markdown(get_table_download_link_csv(proyeccion[["WEEK","Año","VSIGV","Predict"]]), unsafe_allow_html=True)
+    st.write('---')
 
     import plotly.express as px
 
     fig = px.line(data_train_undummy, x="WEEK", y=["VSIGV","Predict"])
 
     st.plotly_chart(fig)
+    st.write('---')
+    shap.summary_plot(shap_values,x_train)
+    st.write('---')
+    st.pyplot(bbox_inches='tight')
