@@ -12,7 +12,7 @@ def app():
     """)
     #DATABASE CONECTION
     sql_conn = pyodbc.connect('DRIVER={SQL Server};SERVER=51.222.82.146;DATABASE=STRATEGIO_OLAP_PROTISA;UID=Cesar_VS;PWD=Invernalia!2193;Trusted_Connection=no')
-    query = "SELECT d.Region,c.Categoria,c.Marca,c.Segmento,DATEPART(MONTH,a.CodigoFecha) AS MONTH,YEAR(a.CodigoFecha) AS YEAR,SUM(a.VentaSinIgv) AS VSIGV FROM [STRATEGIO_OLAP_PROTISA].[pbix].[Ventas] AS a LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Producto] AS c ON a.CodigoProductoDistribuidor = c.CodigoProducto LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Distribuidor] AS d ON a.CodigoDistribuidor = d.CodigoDistribuidor LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Cliente] AS e ON a.CodigoCliente = e.CodigoCliente WHERE YEAR(a.CodigoFecha)>=2018 AND YEAR(a.CodigoFecha)<=2021 AND a.CodigoDistribuidor not in ('20100239559.0','20100239559.1','20100239559.2','20100239559.3','20100239559.7','20100239559.9') AND c.Marca not in ('Ego','Ideal','Sussy') AND a.CodigoDistribuidor IS NOT NULL AND d.Canal NOT IN ('Farmacia') GROUP BY d.Region,c.Categoria,c.Marca,c.Segmento,DATEPART(MONTH,a.CodigoFecha),YEAR(a.CodigoFecha)"
+    query = "SELECT d.Region,c.Categoria,c.Marca,c.Segmento,DATEPART(MONTH,a.CodigoFecha) AS MONTH,YEAR(a.CodigoFecha) AS YEAR,SUM(a.VentaSinIgv) AS VSIGV FROM [STRATEGIO_OLAP_PROTISA].[pbix].[Ventas] AS a LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Producto] AS c ON a.CodigoProductoDistribuidor = c.CodigoProducto LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Distribuidor] AS d ON a.CodigoDistribuidor = d.CodigoDistribuidor LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Cliente] AS e ON a.CodigoCliente = e.CodigoCliente WHERE YEAR(a.CodigoFecha)>=2017 AND YEAR(a.CodigoFecha)<=2021 AND a.CodigoDistribuidor not in ('20100239559.0','20100239559.1','20100239559.2','20100239559.3','20100239559.7','20100239559.9') AND c.Marca not in ('Ego','Ideal','Sussy') AND a.CodigoDistribuidor IS NOT NULL AND d.Canal NOT IN ('Farmacia') GROUP BY d.Region,c.Categoria,c.Marca,c.Segmento,DATEPART(MONTH,a.CodigoFecha),YEAR(a.CodigoFecha)"
     dataset = pd.read_sql(query,sql_conn)
     #MAKE FORM DATABASE
     def makeform(df):
@@ -21,17 +21,20 @@ def app():
         values = data.values
         data = pd.DataFrame(data=values,columns = ['Region', 'Categoria', 'Marca', 'Segmento', 'MONTH','VSIGV2018','VSIGV2019','VSIGV2020','VSIGV2021'])
         data.fillna(0.00,inplace=True)
-        valid_set = data[data['VSIGV2021']>=0].drop('VSIGV2018',axis=1)
+        valid_set = data[data['VSIGV2021']>=0].drop(['VSIGV2017','VSIGV2018'],axis=1)
         valid_set['Year'] = '2021'
         a = valid_set.values
         columnas = valid_set.columns
-        data_train_test = data.drop("VSIGV2021",axis=1)
+        data_train_test = data.drop(["VSIGV2017","VSIGV2021"],axis=1)
         data_train_test['Year'] = '2020'
         b = data_train_test.values
-        c = np.concatenate((a, b))
-        data_train = pd.DataFrame(c)
+        data_train_test = data.drop(["VSIGV2020","VSIGV2021"],axis=1)
+        data_train_test['Year'] = '2019'
+        c = data_train_test.values
+        d = np.concatenate((a, b, c))
+        data_train = pd.DataFrame(d)
         data_train.columns = columnas
-        data_train.rename(columns={'VSIGV2019': 'VSIGV2YA', 
+        data_train.rename(columns={'VSIGV2019': 'VSIGV2YA',
                                    'VSIGV2020': 'VSIGV1YA',
                                    'VSIGV2021': 'VSIGV'}, inplace=True)
         return data_train
@@ -53,11 +56,11 @@ def app():
     segmento_choice = st.sidebar.selectbox('Select segment:', segmento)
 
     #FILTER DATA
-    data_form = data_form.loc[(data_form['Region']==region_choice) & (data_form['Categoria']==categoria_choice) & (data_form['Marca']==marca_choice) & (data_form['Segmento']==segmento_choice)] 
+    data_form = data_form.loc[(data_form['Region']==region_choice) & (data_form['Categoria']==categoria_choice) & (data_form['Marca']==marca_choice) & (data_form['Segmento']==segmento_choice)]
     #SHOW DATAFRAME
     st.dataframe(data_form)
     #SPLIT DATA
-    data_1 = data_form[data_form['VSIGV']>0].drop('Year',axis=1) 
+    data_1 = data_form[data_form['VSIGV']>0].drop('Year',axis=1)
     data_2 = data_form[(data_form['VSIGV']>=0) & (data_form['Year']=='2021')].drop('Year',axis=1)
 
     data_train_dummies_1 = pd.get_dummies(data_1,columns=['Region', 'Categoria', 'Marca', 'Segmento', 'MONTH'],dtype=float)
@@ -75,7 +78,7 @@ def app():
     # create regressor object
     regressor = RandomForestRegressor(random_state = 0)
     # fit the regressor with x and y data
-    regressor.fit(x_train, y_train) 
+    regressor.fit(x_train, y_train)
     #UNDUMMIFY FUNCTION
     def undummify(df, prefix_sep="_"):
         cols2collapse = {
@@ -122,7 +125,7 @@ def app():
         import pybase64
         #csv = df.to_csv(index=False)
         csv = df.to_csv().encode()
-        #b64 = base64.b64encode(csv.encode()).decode() 
+        #b64 = base64.b64encode(csv.encode()).decode()
         b64 = pybase64.b64encode(csv).decode()
         href = f'<a href="data:file/csv;base64,{b64}" download="captura.csv" target="_blank">Download csv file</a>'
         return href
