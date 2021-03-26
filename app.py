@@ -11,7 +11,7 @@ Seleccione la escala temporal de prediccion (semanal, quincenal, mensual)
 """)
 
 st.markdown("""
-![](https://github.com/cesar1091/Logos/blob/main/logo_ml.png)
+![](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png){width='100px'}
 """)
 
 # Add all your application here
