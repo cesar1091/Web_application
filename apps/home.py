@@ -11,4 +11,6 @@ def app():
     ventas en 2 años anteriores y las caracteristicas de segmento, region, categoria,
     marca, ya que estas variables muestran unas caracteristicas de comportamiento repetitivo
     a lo largo del tiempo.
+
+    Seleccione cual dimension de tiempo desea predecir.
     """)
