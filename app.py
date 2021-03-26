@@ -6,8 +6,8 @@ from apps import vsigv_semanal, vsigv_quincena, vsigv_mes, home
 app = MultiApp()
 
 st.markdown("""
-# Multi-Page App
-Select the time of prediccion
+# Web app prediccion de ventas sell out protisa
+Seleccione la escala temporal de prediccion (semanal, quincenal, mensual)
 """)
 
 # Add all your application here
