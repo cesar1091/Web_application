@@ -12,7 +12,7 @@ def app():
     """)
     #DATABASE CONECTION
     sql_conn = pyodbc.connect('DRIVER={SQL Server};SERVER=51.222.82.146;DATABASE=STRATEGIO_OLAP_PROTISA;UID=Cesar_VS;PWD=Invernalia!2193;Trusted_Connection=no')
-    query = "SELECT d.Region,c.Categoria,c.Marca,c.Segmento,(CASE WHEN DATEPART(DAY, a.CodigoFecha) BETWEEN 1 AND 15 THEN 1 ELSE 2 END) AS Quincena,DATEPART(MONTH, a.CodigoFecha) AS MES,DATEPART(YEAR, a.CodigoFecha) AS AÑO,SUM(a.VENTASINIGV) AS VSIGV FROM [STRATEGIO_OLAP_PROTISA].[pbix].[Ventas] AS a LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Producto] AS c ON a.CodigoProductoDistribuidor = c.CodigoProducto LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Distribuidor] AS d ON a.CodigoDistribuidor = d.CodigoDistribuidor LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Cliente] AS e ON a.CodigoCliente = e.CodigoCliente WHERE DATEPART(YEAR, a.CodigoFecha)>=2018 AND DATEPART(YEAR, a.CodigoFecha)<=2021 AND a.CodigoDistribuidor not in ('20100239559.0','20100239559.1','20100239559.2','20100239559.3','20100239559.7','20100239559.9') AND c.Marca not in ('Ego','Ideal','Sussy') AND a.CodigoDistribuidor IS NOT NULL AND d.Canal NOT IN ('Farmacia') GROUP BY d.Region,c.Categoria,c.Marca,c.Segmento,(CASE WHEN DATEPART(DAY, a.CodigoFecha) BETWEEN 1 AND 15 THEN 1 ELSE 2 END),DATEPART(MONTH, a.CodigoFecha),DATEPART(YEAR, a.CodigoFecha)"
+    query = "SELECT d.Region,c.Categoria,c.Marca,c.Segmento,(CASE WHEN DATEPART(DAY, a.CodigoFecha) BETWEEN 1 AND 15 THEN 1 ELSE 2 END) AS Quincena,DATEPART(MONTH, a.CodigoFecha) AS MES,DATEPART(YEAR, a.CodigoFecha) AS AÑO,SUM(a.VENTASINIGV) AS VSIGV FROM [STRATEGIO_OLAP_PROTISA].[pbix].[Ventas] AS a LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Producto] AS c ON a.CodigoProductoDistribuidor = c.CodigoProducto LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Distribuidor] AS d ON a.CodigoDistribuidor = d.CodigoDistribuidor LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Cliente] AS e ON a.CodigoCliente = e.CodigoCliente WHERE DATEPART(YEAR, a.CodigoFecha)>=2017 AND DATEPART(YEAR, a.CodigoFecha)<=2021 AND a.CodigoDistribuidor not in ('20100239559.0','20100239559.1','20100239559.2','20100239559.3','20100239559.7','20100239559.9') AND c.Marca not in ('Ego','Ideal','Sussy') AND a.CodigoDistribuidor IS NOT NULL AND d.Canal NOT IN ('Farmacia') GROUP BY d.Region,c.Categoria,c.Marca,c.Segmento,(CASE WHEN DATEPART(DAY, a.CodigoFecha) BETWEEN 1 AND 15 THEN 1 ELSE 2 END),DATEPART(MONTH, a.CodigoFecha),DATEPART(YEAR, a.CodigoFecha)"
     dataset = pd.read_sql(query,sql_conn)
     #MAKE FORM DATABASE
     def makeform(df):
@@ -21,17 +21,20 @@ def app():
         data = pd.pivot_table(data=df,index=['Region', 'Categoria', 'Marca', 'Segmento', 'Quincena'],columns=["AÑO"],values=["VSIGV"])
         data = data.reset_index()
         values = data.values
-        data = pd.DataFrame(data=values,columns = ['Region', 'Categoria', 'Marca', 'Segmento', 'Quincena','VSIGV2018','VSIGV2019','VSIGV2020','VSIGV2021'])
+        data = pd.DataFrame(data=values,columns = ['Region', 'Categoria', 'Marca', 'Segmento', 'Quincena','VSIGV2017','VSIGV2018','VSIGV2019','VSIGV2020','VSIGV2021'])
         data.fillna(0.00,inplace=True)
-        valid_set = data[data['VSIGV2021']>=0].drop('VSIGV2018',axis=1)
+        valid_set = data[data['VSIGV2021']>=0].drop(['VSIGV2017','VSIGV2018'],axis=1)
         valid_set['Year'] = '2021'
         a = valid_set.values
         columnas = valid_set.columns
-        data_train_test = data.drop("VSIGV2021",axis=1)
+        data_train_test = data.drop(["VSIGV2017","VSIGV2021"],axis=1)
         data_train_test['Year'] = '2020'
         b = data_train_test.values
-        c = np.concatenate((a, b))
-        data_train = pd.DataFrame(c)
+        data_train_test = data.drop(["VSIGV2020","VSIGV2021"],axis=1)
+        data_train_test['Year'] = '2019'
+        c = data_train_test.values
+        d = np.concatenate((a, b, c))
+        data_train = pd.DataFrame(d)
         data_train.columns = columnas
         data_train.rename(columns={'VSIGV2019': 'VSIGV2YA',
                                    'VSIGV2020': 'VSIGV1YA',
