@@ -11,7 +11,7 @@ Seleccione la escala temporal de prediccion (semanal, quincenal, mensual)
 """)
 
 st.markdown("""
-![](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png){width='100px'}
+![](http://www.perusmart.com/wp-content/uploads/machine-learning-2.png)
 """)
 
 # Add all your application here

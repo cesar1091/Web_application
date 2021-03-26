@@ -4,6 +4,7 @@ import numpy as np
 import pyodbc
 
 def app():
+    st.write('---')
     st.write("""
     # Simple Data Sell Protisa
 

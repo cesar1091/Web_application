@@ -40,6 +40,7 @@ class MultiApp:
 
     def run(self):
         # app = st.sidebar.radio(
+        st.write('---')
         app = st.selectbox(
             'Navigation',
             self.apps,
