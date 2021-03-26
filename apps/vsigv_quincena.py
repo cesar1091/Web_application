@@ -62,8 +62,8 @@ def app():
     data_1 = data_form[data_form['VSIGV']>0].drop('Year',axis=1)
     data_2 = data_form[(data_form['VSIGV']>=0) & (data_form['Year']=='2021')].drop('Year',axis=1)
 
-    data_train_dummies_1 = pd.get_dummies(data_1,columns=['Region', 'Categoria', 'Marca', 'Segmento', 'MONTH'],dtype=float)
-    data_train_dummies_2 = pd.get_dummies(data_2,columns=['Region', 'Categoria', 'Marca', 'Segmento', 'MONTH'],dtype=float)
+    data_train_dummies_1 = pd.get_dummies(data_1,columns=['Region', 'Categoria', 'Marca', 'Segmento', 'Quincena'],dtype=float)
+    data_train_dummies_2 = pd.get_dummies(data_2,columns=['Region', 'Categoria', 'Marca', 'Segmento', 'Quincena'],dtype=float)
 
     X_1 = data_train_dummies_1.drop(["VSIGV"],axis=1)
     y_1 = data_train_dummies_1[["VSIGV"]]
