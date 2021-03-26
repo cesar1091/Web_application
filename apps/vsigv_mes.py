@@ -135,5 +135,4 @@ def app():
     import plotly.express as px
 
     fig = px.line(proyeccion[["MONTH","Año","VSIGV","Predict"]], x="MONTH", y=["VSIGV","Predict"])
-
     st.plotly_chart(fig)
