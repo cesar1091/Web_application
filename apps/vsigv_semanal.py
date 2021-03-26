@@ -140,5 +140,3 @@ def app():
     st.plotly_chart(fig)
     st.write('---')
     shap.summary_plot(shap_values,x_train)
-    st.write('---')
-    st.pyplot(bbox_inches='tight')
