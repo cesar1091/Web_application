@@ -2,6 +2,7 @@ import streamlit as st
 
 def app():
     st.write("""
+    ---
     # Modelo de predicción de ventas sell out
     En la siguiente web app se presentan los modelos a escala semanal, quincenal
     y mensual de las ventas sell out.
@@ -14,3 +15,8 @@ def app():
 
     Seleccione cual dimension de tiempo desea predecir.
     """)
+    st.markdown("""
+    ---
+    <p align="center">
+      <img width="300" height="150" src="http://www.perusmart.com/wp-content/uploads/machine-learning-2.png">
+    </p>""",unsafe_allow_html=True)
