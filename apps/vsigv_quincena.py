@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pyodbc
+#import pyodbc
 
 def app():
     st.write('---')
@@ -12,9 +12,10 @@ def app():
 
     """)
     #DATABASE CONECTION
-    sql_conn = pyodbc.connect('DRIVER={SQL Server};SERVER=51.222.82.146;DATABASE=STRATEGIO_OLAP_PROTISA;UID=Cesar_VS;PWD=Invernalia!2193;Trusted_Connection=no')
-    query = "SELECT d.Region,c.Categoria,c.Marca,c.Segmento,(CASE WHEN DATEPART(DAY, a.CodigoFecha) BETWEEN 1 AND 15 THEN 1 ELSE 2 END) AS Quincena,DATEPART(MONTH, a.CodigoFecha) AS MES,DATEPART(YEAR, a.CodigoFecha) AS AÑO,SUM(a.VENTASINIGV) AS VSIGV FROM [STRATEGIO_OLAP_PROTISA].[pbix].[Ventas] AS a LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Producto] AS c ON a.CodigoProductoDistribuidor = c.CodigoProducto LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Distribuidor] AS d ON a.CodigoDistribuidor = d.CodigoDistribuidor LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Cliente] AS e ON a.CodigoCliente = e.CodigoCliente WHERE DATEPART(YEAR, a.CodigoFecha)>=2017 AND DATEPART(YEAR, a.CodigoFecha)<=2021 AND a.CodigoDistribuidor not in ('20100239559.0','20100239559.1','20100239559.2','20100239559.3','20100239559.7','20100239559.9') AND c.Marca not in ('Ego','Ideal','Sussy') AND a.CodigoDistribuidor IS NOT NULL AND d.Canal NOT IN ('Farmacia') GROUP BY d.Region,c.Categoria,c.Marca,c.Segmento,(CASE WHEN DATEPART(DAY, a.CodigoFecha) BETWEEN 1 AND 15 THEN 1 ELSE 2 END),DATEPART(MONTH, a.CodigoFecha),DATEPART(YEAR, a.CodigoFecha)"
-    dataset = pd.read_sql(query,sql_conn)
+    #sql_conn = pyodbc.connect('DRIVER={SQL Server};SERVER=51.222.82.146;DATABASE=STRATEGIO_OLAP_PROTISA;UID=Cesar_VS;PWD=Invernalia!2193;Trusted_Connection=no')
+    #query = "SELECT d.Region,c.Categoria,c.Marca,c.Segmento,(CASE WHEN DATEPART(DAY, a.CodigoFecha) BETWEEN 1 AND 15 THEN 1 ELSE 2 END) AS Quincena,DATEPART(MONTH, a.CodigoFecha) AS MES,DATEPART(YEAR, a.CodigoFecha) AS AÑO,SUM(a.VENTASINIGV) AS VSIGV FROM [STRATEGIO_OLAP_PROTISA].[pbix].[Ventas] AS a LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Producto] AS c ON a.CodigoProductoDistribuidor = c.CodigoProducto LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Distribuidor] AS d ON a.CodigoDistribuidor = d.CodigoDistribuidor LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Cliente] AS e ON a.CodigoCliente = e.CodigoCliente WHERE DATEPART(YEAR, a.CodigoFecha)>=2017 AND DATEPART(YEAR, a.CodigoFecha)<=2021 AND a.CodigoDistribuidor not in ('20100239559.0','20100239559.1','20100239559.2','20100239559.3','20100239559.7','20100239559.9') AND c.Marca not in ('Ego','Ideal','Sussy') AND a.CodigoDistribuidor IS NOT NULL AND d.Canal NOT IN ('Farmacia') GROUP BY d.Region,c.Categoria,c.Marca,c.Segmento,(CASE WHEN DATEPART(DAY, a.CodigoFecha) BETWEEN 1 AND 15 THEN 1 ELSE 2 END),DATEPART(MONTH, a.CodigoFecha),DATEPART(YEAR, a.CodigoFecha)"
+    #dataset = pd.read_sql(query,sql_conn)
+    dataset = pd.read_csv('vsigv_quincena.csv')
     #MAKE FORM DATABASE
     def makeform(df):
         df['Quincena'] = df['Quincena'] + 2*(df['MES']-1)
