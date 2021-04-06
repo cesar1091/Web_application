@@ -14,7 +14,7 @@ def app():
     #DATABASE CONECTION
     #sql_conn = pyodbc.connect('DRIVER={SQL Server};SERVER=51.222.82.146;DATABASE=STRATEGIO_OLAP_PROTISA;UID=Cesar_VS;PWD=Invernalia!2193;Trusted_Connection=no')
     #query = "SELECT d.Region,c.Categoria,c.Marca,c.Segmento,DATEPART(MONTH,a.CodigoFecha) AS MONTH,YEAR(a.CodigoFecha) AS YEAR,SUM(a.VentaSinIgv) AS VSIGV FROM [STRATEGIO_OLAP_PROTISA].[pbix].[Ventas] AS a LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Producto] AS c ON a.CodigoProductoDistribuidor = c.CodigoProducto LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Distribuidor] AS d ON a.CodigoDistribuidor = d.CodigoDistribuidor LEFT JOIN [STRATEGIO_OLAP_PROTISA].[pbix].[Cliente] AS e ON a.CodigoCliente = e.CodigoCliente WHERE YEAR(a.CodigoFecha)>=2017 AND YEAR(a.CodigoFecha)<=2021 AND a.CodigoDistribuidor not in ('20100239559.0','20100239559.1','20100239559.2','20100239559.3','20100239559.7','20100239559.9') AND c.Marca not in ('Ego','Ideal','Sussy') AND a.CodigoDistribuidor IS NOT NULL AND d.Canal NOT IN ('Farmacia') GROUP BY d.Region,c.Categoria,c.Marca,c.Segmento,DATEPART(MONTH,a.CodigoFecha),YEAR(a.CodigoFecha)"
-    dataset = pd.read_csv('vsigv_mes.csv')
+    dataset = pd.read_csv('apps/vsigv_mes.csv')
     #MAKE FORM DATABASE
     def makeform(df):
         data = pd.pivot_table(data=df,index=['Region', 'Categoria', 'Marca', 'Segmento', 'MONTH'],columns=["YEAR"],values=["VSIGV"])
